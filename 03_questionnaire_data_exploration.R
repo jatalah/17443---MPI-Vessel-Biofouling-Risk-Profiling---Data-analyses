@@ -819,3 +819,5 @@ tabyl(q, BF_management_plan) %>%
 # aware of IMO guidelines ----
 tabyl(q, Aware_of_IMO_BFG) %>%
   kable(digits = 2)
+
+# THE END #####

@@ -114,15 +114,20 @@ caw21_clean <-
   relocate(crms, .after = caw_risk_score) %>% 
   relocate(area_type, .after = area) %>% 
   dplyr::filter(sample_id  != "CAP CAPRICORN_Rope guard_Niche_NA_Stern_NA_NA") %>% # missing data due to bad viz
-  mutate_at(vars(gooseneck:other_organism_45), ~replace_na(., 0))
+  mutate_at(vars(gooseneck:other_organism_45), ~replace_na(., 0)) %>%
+  rename(`% cover` = "macro_percent_cover" , `FR rating` = "highest_fr_rating") %>% 
+  mutate(type = str_to_sentence(type)) %>%
+  rowwise() %>%
+  mutate(Richness = sum(c_across(gooseneck:other) > 0), .after="FR rating")
+
+
+# save clean biofouling data--------
+write_csv(caw21_clean, 'cleaned_data/caw21_biofouling_data_clean.csv')
 
 # Check for missing values---
 naniar::gg_miss_var(caw21_clean) 
 glimpse(caw21_clean)
 names(caw21_clean)
-
-# check for vars full of NAs
-caw21_clean %>% keep( ~ all(is.na(.x))) %>% names
 
 # check factor levels--
 tabyl(caw21_clean, area)
@@ -136,26 +141,17 @@ tabyl(caw21_clean, hull_depth)
 
 # check response variable
 tabyl(caw21_clean, LoF)
-tabyl(caw21_clean, macro_percent_cover)
+tabyl(caw21_clean, `% cover`)
 tabyl(caw21_clean, highest_fr_rating)# need to sort out missing values here
-hist(caw21_clean$macro_percent_cover,
+hist(caw21_clean$`% cover`,
+     xlab = "% cover",
+     main = NULL)
+
+hist(caw21_clean$richness,
      xlab = "% cover",
      main = NULL)
 
 summary(caw21_clean)
-
-# check the macro_percent_cover variable
-caw21_clean %>%
-  rowwise() %>%
-  mutate(tc = sum(c_across(gooseneck:other), na.rm = T)) %>%
-  ggplot(aes(macro_percent_cover , tc)) +
-  geom_point()
-
-caw21_clean %>%
-  rowwise() %>%
-  mutate(tc = sum(c_across(gooseneck:other), na.rm = T)) %>%
-  filter(tc != macro_percent_cover) %>%
-  select(sample_id)
 
 # check duplicated sample-id----
 caw21_clean %>%
@@ -163,5 +159,3 @@ caw21_clean %>%
   dplyr::filter(n() > 1) %>% 
   select(sample_id)# there are 14 duplicated sample id
 
-# save clean biofouling data--------
-write_csv(caw21_clean, 'cleaned_data/caw21_biofouling_data_clean.csv')
