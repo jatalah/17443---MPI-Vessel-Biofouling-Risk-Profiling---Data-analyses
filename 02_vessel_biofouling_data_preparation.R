@@ -164,4 +164,4 @@ caw21_clean %>%
   select(sample_id)# there are 14 duplicated sample id
 
 # save clean biofouling data--------
-write_csv(caw21_clean, 'cleaned_data/caw21_clean.csv')
+write_csv(caw21_clean, 'cleaned_data/caw21_biofouling_data_clean.csv')
