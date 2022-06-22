@@ -20,7 +20,8 @@ quest_21 <-
   read_excel(
     "C:/Users/javiera/Cawthron/17443 - MPI Vessel Biofouling Risk Profiling - Documents/2. Field data/Questionnaire_forms_data.xlsx",
     trim_ws = T
-  ) %>% select(-c(1:5)) %>%
+  ) %>% 
+  select(-c(1:5)) %>%
   rename_at(vars(quest_align$name_2021), ~ quest_align$question_17) %>%
   mutate(
     Time_since_survey = (`2 Date of arrival` - Last_class_survey) %>% as.numeric(),
@@ -153,8 +154,11 @@ model_data <-
   dplyr::filter(type != "Fishing") # remove one fishing vessel in the 2017 data 
 
 # check NAs------------
-model_data %>% 
-  summarise(across(everything(), ~ sum(is.na(.))))
+model_data %>%
+  select_if(function(x) any(is.na(x))) %>%
+  summarise(across(everything(), ~ sum(is.na(.)))) %>% 
+  pivot_longer(cols = everything(), names_to = 'var', values_to = 'NAs')
+
 
 # data imputation ---------
 impute_para <-

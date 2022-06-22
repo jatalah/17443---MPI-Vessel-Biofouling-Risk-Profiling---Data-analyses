@@ -28,7 +28,9 @@ rm(list = ls())
 # read data-------
 model_data <- 
   read_csv('cleaned_data/model_data.csv') %>% 
-  mutate(crms = factor(crms))
+  mutate(crms = factor(crms)) %>% 
+  mutate(crms = fct_relevel(crms, 'pass'))
+
 
 # CRMS compliance status ------
 model_data %>%
@@ -44,10 +46,14 @@ model_data %>%
   kable()
 
 # check correlated variables ---------
+model_data_names <- read_csv('cleaned_data/model_data_names.csv')
+
 pre_cor <-
   round(cor(
     model_data %>%
-      select(where(is.numeric) & !contains('vessel_')),
+      rename_at(vars(model_data_names$name), ~ model_data_names$new_name) %>% 
+      select(where(is.numeric) & !contains('vessel_')) ,
+    
     method = "pearson",
     use = "complete.obs"
   ),
@@ -61,8 +67,18 @@ pred_corplot <-
                          p.mat = p_mat, 
                          hc.order = TRUE,
                          type = "lower", 
-                         insig = "blank", lab = T)
+                         insig = "blank",
+                         lab = T,
+                         colors = c("#6D9EC1", "white", "#E46726"),
+                         lab_size = 3,
+                         tl.cex = 10)
 pred_corplot
+
+ggsave(pred_corplot,
+       filename = 'figures/pred_corplot.png',
+       dpi = 300,
+       width = 7,
+       height = 5)
 
 
 # remove highly correlated variables----------
@@ -79,7 +95,15 @@ red_model_data <-
     -max_speed,
     -cleaning_since_af,
     -vessel_number
-  )
+  ) %>% 
+  write_csv('cleaned_data/reduced_model_data.csv')
+
+# red_model_data <- read_csv('cleaned_data/reduced_model_data.csv')
+
+model_data_names %>% 
+  dplyr::filter(name%in%names(red_model_data)) %>% 
+  pull(new_name)
+
 
 
 # set train control -------
@@ -205,6 +229,8 @@ results <-
   )) %>% 
   write_rds('outputs/candidate_models_results.rds')
 
+results <- read_rds('outputs/candidate_models_results.rds')
+
 # summarize the distributions-----
 summary(results)
 results$values %>% as_tibble() %>% 
@@ -228,8 +254,10 @@ candidate_models_performance_plot <-
   ggplot(results, metric = c("ROC", "Sens","Spec")) +
   labs(y = "Cross-validation performance")
 
+candidate_models_performance_plot
+
 ggsave(candidate_models_performance_plot,
        filename = 'figures/candidate_models_performance_plot.png',
        dpi = 300,
-       width = 6,
+       width = 7,
        height = 5)

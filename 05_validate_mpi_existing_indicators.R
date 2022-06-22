@@ -33,7 +33,8 @@ crms_mpi <-
   select(1:`Areas failing`) %>% 
   clean_names() %>% 
   mutate(mpi_pred = if_else(mpi_c>1,'fail','pass'),
-         crms = fct_relevel(crms, 'pass'))
+         crms = fct_relevel(crms, 'fail'),
+         mpi_pred = fct_relevel(mpi_pred, 'fail'))
 
 
 crms_mpi %>%
@@ -63,6 +64,7 @@ confusion_plot <-
   autoplot(cm, type = "heatmap") +
   scale_fill_gradient(low="#D6EAF8",high = "#2E86C1") +
   labs(x = 'Observed CRMS status', y = "Predicted CRMS status")
+confusion_plot
 
 summary(cm) %>% 
   select(-.estimator) %>% 

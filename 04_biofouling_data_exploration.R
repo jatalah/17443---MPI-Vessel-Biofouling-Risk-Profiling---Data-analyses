@@ -31,7 +31,6 @@ rm(list = ls())
 
 d <- read_csv('cleaned_data/caw21_biofouling_data_clean.csv') 
 
-
 d %>% 
   select(`% cover`:Richness) %>% 
   cor() %>% 
@@ -119,20 +118,41 @@ boxplot_type <-
   ggplot(d_long_sum, aes(type, value, fill = crms)) +
   geom_boxplot(alpha = .2) +
   labs(x = NULL, y = NULL) +
-  facet_wrap(~name, scales = 'free')
+  facet_wrap(~name, scales = 'free') +
+  scale_fill_discrete(name = 'CRMS')
 
 boxplot_type
 
+# save boxplot by vessel type------
+ggsave(
+  boxplot_type,
+  filename = 'figures/boxplot_biofouling_diversity_type.png',
+  device = 'png',
+  dpi = 300,
+  width = 6,
+  height = 4
+)
 
 #'<H3> Cover, LoF and FR rating by area</H3> 
 boxplot_area <- 
   ggplot(d_long_sum, aes(area, value, fill = crms)) +
-  geom_boxplot(alpha = .2) +
+  geom_boxplot(alpha = .3) +
   coord_flip() +
   labs(x = NULL, y = NULL) +
-  facet_wrap(~name, scales = 'free_x')
+  facet_wrap(~name, scales = 'free_x') +
+  scale_fill_discrete(name = 'CRMS')
 
 boxplot_area
+
+# save boxplot by vessel area-----
+ggsave(
+  boxplot_area,
+  filename = 'figures/boxplot_area.png',
+  device = 'png',
+  dpi = 300,
+  width = 6.5,
+  height = 6.5
+)
 
 #'<H3> Summary table Cover, LoF and FR rating by area</H3> 
 d_long_sum %>%
@@ -156,15 +176,6 @@ d_long_sum %>%
   datatable() %>% 
   formatRound(columns=c(3:11), digits=2)
 
-# save boxplot by vessel area-----
-ggsave(
-  boxplot_area,
-  filename = 'figures/boxplot_area.png',
-  device = 'png',
-  dpi = 300,
-  width = 6.5,
-  height = 6.5
-)
 
 #'<H3> Cover, LoF and FR rating by area and subarea</H3> 
 #+ fig.width = 14
@@ -199,26 +210,6 @@ boxplot_region <-
   facet_wrap( ~ name, scales = 'free')
 
 boxplot_region
-
-# save all box-plots together------
-all_bp <-
-  ggarrange(
-    boxplot_type,
-    boxplot_region,
-    bp_side,
-    nrow = 3,
-    labels = 'auto',
-    common.legend = T
-  )
-
-ggsave(
-  boxplot_type,
-  filename = 'figures/biofouling_boxplots.png',
-  device = 'png',
-  dpi = 300,
-  width = 6,
-  height = 4
-)
 
 #'<H3> Cover, LoF and FR rating by hull depth</H3> 
 d_long %>%
@@ -267,7 +258,7 @@ taxa_long <-
 # box-plot taxa by crms type----
 taxa_long %>% 
   ggplot() +
-  geom_boxplot(aes(name, value, fill = crms)) +
+  geom_boxplot(aes(name, value, fill = crms), alpha = .5) +
   facet_wrap(~type) +
   coord_flip() +
   scale_y_log10()
@@ -285,11 +276,13 @@ taxa_long %>%
   labs(x = 'CRMS', y = NULL)
 
 taxa_bar_plot
+
+# save taxa composition bar plot------
 ggsave(taxa_bar_plot,
        filename = 'figures/taxa_bar_plot.png',
        height = 4.6,
        width = 7.3,
-       dpi = 600)
+       dpi = 900)
 
 #'<H3> Summary table taxa cover by CRMS and type</H3> 
 taxa_long %>%
@@ -335,7 +328,7 @@ ggord(
     alpha = .5,
     veclsz = .2,
     vec_ext = 0.5,
-    grp_title = "Compliance\nstatus"
+    grp_title = "CRMS"
   ) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
@@ -354,7 +347,7 @@ mds_ord_pa <-
     alpha = .5,
     veclsz = .2,
     vec_ext = 0.5,
-    grp_title = "Compliance\nstatus"
+    grp_title = "CRMS"
   ) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
@@ -389,7 +382,7 @@ ggord(
   alpha = .5,
   veclsz = .2,
   vec_ext = 0.5,
-  grp_title = "Vessel\ntype"
+  grp_title = "Type"
 ) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
