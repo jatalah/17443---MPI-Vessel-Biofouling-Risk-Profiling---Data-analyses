@@ -86,7 +86,7 @@ q %>%
 
 histo_desc_vars
 
-## 1.1 Boxplots of vessel characteristics -----
+## 1.1 Box-plots of vessel characteristics -----
 boxplot_desc_vars <- 
 q %>% 
   pivot_longer(cols = Tonnage_DWT:Max_speed) %>% 
@@ -208,6 +208,13 @@ q %>%
   unnest(anovas) %>%
   rename(F = "statistic") %>% 
   kable(digits = 2)
+
+# Time since OWM vs Time since AF-------
+q %>% 
+  ggplot(aes(Time_since_OWM,Time_since_AF, label = `5 Vessel registered name`, color = Type)) +
+  geom_point() +
+  ggrepel::geom_text_repel(size = 3) +
+  geom_abline(lty = 3)
 
 ## 2.2 AF_Applied by vessel type -----
 af_applied_plot <- 
