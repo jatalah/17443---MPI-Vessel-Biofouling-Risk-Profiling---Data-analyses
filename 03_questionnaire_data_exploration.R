@@ -87,14 +87,28 @@ q %>%
 histo_desc_vars
 
 ## 1.1 Box-plots of vessel characteristics -----
+labels_des <-
+  as_labeller(
+    c(
+      Tonnage_DWT = "Tonnage (DWT)"  ,
+      Max_draught = "Max. draught (m)",
+      LOA = "L.O.A. (m)" ,
+      Beam = "Beam (m)",
+      Av_speed = "Av. speed (kt)",
+      Max_speed = "Max. speed (kt)"
+    )
+  )
+
+
 boxplot_desc_vars <- 
 q %>% 
   pivot_longer(cols = Tonnage_DWT:Max_speed) %>% 
-  ggplot(aes(Type, value)) +
+  ggplot(aes(Type, value, fill = crms)) +
   geom_boxplot(alpha = .5) +
-  facet_wrap(~name, scales = 'free_y') +
+  facet_wrap(~name, scales = 'free_y', labeller = labels_des) +
+  scale_fill_discrete(name = "CRMS") +
   scale_y_continuous(label=scales::comma) +
-  labs(x = NULL)
+  labs(x = NULL, y = NULL)
 
 boxplot_desc_vars
 
@@ -103,7 +117,7 @@ ggsave(
   device = "png",
   filename = 'figures/boxplots_vessel_descriptors.png',
   height = 3.5,
-  width = 6,
+  width = 7,
   dpi = 300
 )
 
@@ -209,12 +223,24 @@ q %>%
   rename(F = "statistic") %>% 
   kable(digits = 2)
 
-# Time since OWM vs Time since AF-------
+# Time since OWM vs Time since AF-----------
 q %>% 
-  ggplot(aes(Time_since_OWM,Time_since_AF, label = `5 Vessel registered name`, color = Type)) +
-  geom_point() +
-  ggrepel::geom_text_repel(size = 3) +
-  geom_abline(lty = 3)
+  ggplot(aes(Time_since_OWM,Time_since_AF, label = `5 Vessel registered name`, shape = Type, color  = crms)) +
+  geom_point(size = 3, alpha = .5, position = position_jitter()) +
+  # ggrepel::geom_text_repel(size = 2) +
+  geom_abline(lty = 3) +
+  labs(x = 'Time since OWM (days)', y = 'Time since AF (days)') +
+  ylim(0,2000) +
+  annotate(geom = 'text', x = 500, y = 1750, label = 'r = 0.91')
+
+ggsave(
+  last_plot(),
+  device = "png",
+  filename = 'figures/time_since_OWM_and_AF_scatterplot.png',
+  height = 3,
+  width = 4,
+  dpi = 300
+)
 
 ## 2.2 AF_Applied by vessel type -----
 af_applied_plot <- 

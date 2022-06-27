@@ -42,7 +42,6 @@ crms_mpi %>%
   mutate(prop = round(prop.table(n),2)) %>% 
   kable()
 
-
 crms_mpi %>%
   mutate(crms = if_else(crms == "fail", 1, 0)) %>%
   ggplot(aes(d = crms, m = mpi_c)) + geom_roc(labelsize = 3) +

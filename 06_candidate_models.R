@@ -29,7 +29,7 @@ rm(list = ls())
 model_data <- 
   read_csv('cleaned_data/model_data.csv') %>% 
   mutate(crms = factor(crms)) %>% 
-  mutate(crms = fct_relevel(crms, 'pass'))
+  mutate(crms = fct_relevel(crms, 'fail'))
 
 
 # CRMS compliance status ------
@@ -96,6 +96,8 @@ red_model_data <-
     -cleaning_since_af,
     -vessel_number
   ) %>% 
+  %>% 
+  mutate(crms = fct_relevel(crms, 'fail')) %>% 
   write_csv('cleaned_data/reduced_model_data.csv')
 
 # red_model_data <- read_csv('cleaned_data/reduced_model_data.csv')
@@ -139,15 +141,15 @@ m_rf$finalModel
 
 
 # neural networks----------------
-m_nn <-
-  train(
-    crms  ~ .,
-    data = red_model_data,
-    preProcess = c("center", "scale","YeoJohnson"),
-    method = "nnet",
-    trControl=train_control
-  )
-m_nn
+# m_nn <-
+#   train(
+#     crms  ~ .,
+#     data = red_model_data,
+#     preProcess = c("center", "scale","YeoJohnson"),
+#     method = "nnet",
+#     trControl=train_control
+#   )
+# m_nn
 
 # Boosted regression trees----------
 m_brt <-
